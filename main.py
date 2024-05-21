@@ -108,3 +108,7 @@ def getRandomIndices(start, stop):
     while f == s:
         f, s = random.randint(start, stop), random.randint(start, stop)
     return f, s
+
+
+if __name__ == "__main__":
+    

@@ -2,7 +2,8 @@ from typing import List
 import numpy as np
 import random
 import time
-
+import math
+from typing import Tuple
 
 class Task:
     def __init__(self, id: int, tpm: List[int], tpm_sum: int) -> None:
@@ -14,6 +15,43 @@ class Task:
         return f"id: {self.id} | {[time for time in self.tpm]}"
 
 
+class Tabu:
+    def __init__(self, ban: Tuple[int], ttl: int = 7):
+        self.ttl = ttl
+        self.ban = ban
+    
+    def decrease_ttl(self):
+        self.ttl -= 1
+        
+    def is_banned(self, order) -> bool:
+        index = order.index(self.ban[0])
+        return order[index+1] == self.ban[1]
+
+
+class TabuList:
+    def __init__(self):
+        self.ban_list = []
+    
+    def add_ban(self, ban: Tabu):
+        self.ban_list.append(ban)
+    
+    def make_step(self):
+        for ban in self.ban_list:
+            ban.decrease_ttl()
+            if ban.ttl == 0:
+                self.ban_list.remove(ban)
+
+    def is_order_banned(self, order) -> bool:
+        if not self.ban_list:
+            return False
+        
+        for ban in self.ban_list:
+            if ban.is_banned(order):
+                return True
+        
+        return False
+        
+           
 def calculate_time(func):
     """
         Decorator to calculate total execution time of a function.
@@ -109,6 +147,33 @@ def getRandomIndices(start, stop):
         f, s = random.randint(start, stop), random.randint(start, stop)
     return f, s
 
+def swap(data, i, j):
+    data[i], data[j] = data[j], data[i]
+    return data 
+
+def make_step(data):
+    data = np.array(data)
+    order = [t.id-1 for t in data]
+    minCmax = math.inf
+    best_i, best_j = None, None
+    for i in range(len(order)):
+        for j in range(len(order)):
+            if i != j:
+                order = swap(order, i, j) 
+                newCmax = getTotalTime(data[order])
+                if newCmax < minCmax:
+                    minCmax = newCmax
+                    best_i, best_j = i, j
+                else:
+                    order = swap(order, i, j) 
+                    
+    order = swap(order, best_i, best_j)
+
+    return data[order]
+        
+        
+def tabu_search(data):
+    pass
 
 if __name__ == "__main__":
     pass

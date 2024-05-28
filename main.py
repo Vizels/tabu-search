@@ -6,10 +6,9 @@ import math
 from typing import Tuple
 
 class Task:
-    def __init__(self, id: int, tpm: List[int], tpm_sum: int) -> None:
+    def __init__(self, id: int, tpm: List[int]) -> None:
         self.id = id
         self.tpm = tpm
-        self.tpm_sum = tpm_sum
     
     def __repr__(self) -> str:
         return f"id: {self.id} | {[time for time in self.tpm]}"
@@ -100,7 +99,7 @@ def readData(filepath: str) -> dict[str: List[Task]]:
                         counter += 1    
                         continue
                     tpm = [int(item) for item in line.split(" ")]
-                    newTask = Task(counter, tpm, np.sum(tpm))
+                    newTask = Task(counter, tpm)
                     data[current_section].append(newTask)
                     counter += 1 
     return data

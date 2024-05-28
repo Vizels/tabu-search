@@ -4,6 +4,7 @@ import random
 import time
 import math
 from typing import Tuple
+import matplotlib.pyplot as plt
 
 class Task:
     def __init__(self, id: int, tpm: List[int]) -> None:
@@ -23,12 +24,11 @@ class Tabu:
         self.ttl -= 1
         
     def is_banned(self, order) -> bool:
-        if self.ban == (None, None):
-            return False
         index = order.index(self.ban[0])
         if index == len(order)-1:
             return False
-        return order[index+1] == self.ban[1]
+        return self.ban[1] in order[index+1:]
+        # return order[index+1] == self.ban[1]
 
 
 class TabuList:
@@ -37,8 +37,8 @@ class TabuList:
     
     def add_ban(self, ban: Tabu):
         self.ban_list.append(ban)
-    
-    def make_step(self):
+
+    def decrease_ttl(self):
         for ban in self.ban_list:
             ban.decrease_ttl()
             if ban.ttl == 0:
@@ -53,7 +53,9 @@ class TabuList:
                 return True
         
         return False
-        
+    
+    def __str__(self):
+        return "\n".join([f"{tabu.ban}" for tabu in self.ban_list])     
            
 def calculate_time(func):
     """
@@ -159,35 +161,45 @@ def make_step(data, tabu_list: TabuList, tabu_ttl: int):
     order = [t.id-1 for t in data]
     minCmax = math.inf
     best_i, best_j = None, None
+
     for i in range(len(order)):
         for j in range(len(order)):
             if i != j:
                 order = swap(order, i, j)
                 if tabu_list.is_order_banned(order):
+                    order = swap(order, i, j) 
                     continue 
                 newCmax = getTotalTime(data[order])
                 if newCmax < minCmax:
                     minCmax = newCmax
                     best_i, best_j = i, j
-                else:
-                    order = swap(order, i, j) 
+                order = swap(order, i, j) 
 
     if best_j is None or best_i is None:
-        return data[order], Tabu((None, None), tabu_ttl)
+        return data[order], tabu_list, None
 
-    order = swap(order, best_i, best_j)
-    tabu = Tabu((order[0], order[1]), tabu_ttl)
+    left, right = (best_i, best_j) if best_i < best_j else (best_j, best_i)
+    ban_elements = (order[left], order[right]) 
+    tabu = Tabu(ban_elements, tabu_ttl)
+    tabu_list.add_ban(tabu)
     
-    return data[order], tabu
+    order = swap(order, best_i, best_j)
+    
+    return data[order], tabu_list, minCmax
         
         
 def tabu_search(data, n_iter=1000, tabu_ttl=7):
+    Cmax = []
     tabu_list = TabuList()
     for i in range(n_iter):
-        data, tabu = make_step(data, tabu_list, tabu_ttl)
-        tabu_list.make_step()
-        tabu_list.ban_list.append(tabu)
+        data, tabu_list, cmax = make_step(data, tabu_list, tabu_ttl)
+        print(f"iter: {i}: {tabu_list}")
+        tabu_list.decrease_ttl()
+        if cmax is not None:
+            Cmax.append(cmax)
     
+    plt.plot(np.arange(len(Cmax)), Cmax)
+    plt.show()
     return data
     
 
@@ -196,7 +208,7 @@ def main():
     data = data["data.001"]
     # print(f"Data: {data}")
     print(f"Starting Total Time: {getTotalTime(data)}")
-    data = tabu_search(data, 2000, 8)
+    data = tabu_search(data, 10, 8)
     print(f"Total_time: {getTotalTime(data)}")
     
 if __name__ == "__main__":

@@ -24,6 +24,8 @@ class Tabu:
         
     def is_banned(self, order) -> bool:
         index = order.index(self.ban[0])
+        if index == len(order)-1:
+            return False
         return order[index+1] == self.ban[1]
 
 
@@ -150,7 +152,7 @@ def swap(data, i, j):
     data[i], data[j] = data[j], data[i]
     return data 
 
-def make_step(data):
+def make_step(data, tabu_list: TabuList, tabu_ttl: int):
     data = np.array(data)
     order = [t.id-1 for t in data]
     minCmax = math.inf
@@ -158,21 +160,38 @@ def make_step(data):
     for i in range(len(order)):
         for j in range(len(order)):
             if i != j:
-                order = swap(order, i, j) 
+                order = swap(order, i, j)
+                if tabu_list.is_order_banned(order):
+                    continue 
                 newCmax = getTotalTime(data[order])
                 if newCmax < minCmax:
                     minCmax = newCmax
                     best_i, best_j = i, j
                 else:
                     order = swap(order, i, j) 
-                    
+
     order = swap(order, best_i, best_j)
-
-    return data[order]
+    tabu = Tabu((order[0], order[1]), tabu_ttl)
+    
+    return data[order], tabu
         
         
-def tabu_search(data):
-    pass
+def tabu_search(data, n_iter=1000, tabu_ttl=7):
+    tabu_list = TabuList()
+    for i in range(n_iter):
+        data, tabu = make_step(data, tabu_list, tabu_ttl)
+        tabu_list.make_step()
+        tabu_list.ban_list.append(tabu)
+    
+    return data
+    
 
+def main():
+    data = readData("data/data.txt")
+    data = data["data.001"]
+    print(f"Data: {data}")
+    data = tabu_search(data, 1000, 7)
+    print(f"Total_time: {getTotalTime(data)}")
+    
 if __name__ == "__main__":
-    pass
+    main()

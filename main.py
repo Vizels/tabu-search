@@ -23,6 +23,8 @@ class Tabu:
         self.ttl -= 1
         
     def is_banned(self, order) -> bool:
+        if self.ban == (None, None):
+            return False
         index = order.index(self.ban[0])
         if index == len(order)-1:
             return False
@@ -170,6 +172,9 @@ def make_step(data, tabu_list: TabuList, tabu_ttl: int):
                 else:
                     order = swap(order, i, j) 
 
+    if best_j is None or best_i is None:
+        return data[order], Tabu((None, None), tabu_ttl)
+
     order = swap(order, best_i, best_j)
     tabu = Tabu((order[0], order[1]), tabu_ttl)
     
@@ -189,8 +194,9 @@ def tabu_search(data, n_iter=1000, tabu_ttl=7):
 def main():
     data = readData("data/data.txt")
     data = data["data.001"]
-    print(f"Data: {data}")
-    data = tabu_search(data, 1000, 7)
+    # print(f"Data: {data}")
+    print(f"Starting Total Time: {getTotalTime(data)}")
+    data = tabu_search(data, 2000, 8)
     print(f"Total_time: {getTotalTime(data)}")
     
 if __name__ == "__main__":

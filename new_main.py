@@ -168,10 +168,11 @@ def make_step(data, tabu_list: TabuList, tabu_ttl=7):
     return data, tabu_list, None
 
 
-def tabu_search(data, n_iter=1000, tabu_ttl=7):
+def tabu_search(data, n_iter=1000, tabu_ttl=7, use_best=False, show_plot=False):
     "Tabu search algorithm implementation."
     init_cmax = getTotalTime(data)
     cmax_history = [init_cmax]
+    best_cmax = math.inf
 
     tabu_list = TabuList()
     for i in range(n_iter):
@@ -179,13 +180,19 @@ def tabu_search(data, n_iter=1000, tabu_ttl=7):
         #print(f"iter: {i}: \n{tabu_list}")
         if cmax is not None:
             cmax_history.append(cmax)
+            if use_best:
+                if cmax < best_cmax:
+                    best_data = data
+                    best_cmax = cmax
 
-    #plt.plot(np.arange(len(cmax_history)), cmax_history)
-    #plt.show()
-    return data
+    if show_plot:
+        plt.plot(np.arange(len(cmax_history)), cmax_history)
+        plt.show()
+
+    return best_data if use_best else data
 
 
-def test_different_parameters(data: str, start: int, stop: int, step: int, parameter_type: str):
+def test_different_parameters(data: str, start: int, stop: int, step: int, parameter_type: str, use_best=False):
     "Test the algorithm with different parameters."
     data = read_data("data/data.txt")
     data = data["data.001"]
@@ -193,9 +200,9 @@ def test_different_parameters(data: str, start: int, stop: int, step: int, param
     Cmax_history = []
     for i in parameter_history:
         if parameter_type == "tabu_ttl":
-            data = tabu_search(data, 500, tabu_ttl=i)
+            data = tabu_search(data, 500, tabu_ttl=i, show_plot=False, use_best=use_best)
         elif parameter_type == "n_iter":
-            data = tabu_search(data, n_iter=i)
+            data = tabu_search(data, n_iter=i, show_plot=False, use_best=use_best)
         Cmax_history.append(getTotalTime(data))
 
     plt.plot(parameter_history, Cmax_history)
@@ -204,13 +211,13 @@ def test_different_parameters(data: str, start: int, stop: int, step: int, param
 
 def main():
     data = read_data("data/data.txt")
-    data = data["data.001"]
+    data = data["data.010"]
     # print(f"Data: {data}")
     print(f"Starting Total Time: {getTotalTime(data)}")
-    data = tabu_search(data, 20, tabu_ttl=10)
+    data = tabu_search(data, 2000, tabu_ttl=10, show_plot=True, use_best=True)
     print(f"Total_time: {getTotalTime(data)}")
 
 
 if __name__ == "__main__":
-    #main()
-    test_different_parameters("data.010", 1, 20, 1, "tabu_ttl")
+    main()
+    # test_different_parameters("data.010", 1, 20, 1, "tabu_ttl")

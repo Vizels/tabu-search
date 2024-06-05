@@ -164,7 +164,6 @@ def make_step(data, tabu_list: TabuList, tabu_ttl=7):
         data = swap(data, best_i, best_j)
         return data, tabu_list, min_cmax
 
-    print("NO WAY")
 
     return data, tabu_list, None
 
@@ -177,13 +176,30 @@ def tabu_search(data, n_iter=1000, tabu_ttl=7):
     tabu_list = TabuList()
     for i in range(n_iter):
         data, tabu_list, cmax = make_step(data, tabu_list, tabu_ttl)
-        print(f"iter: {i}: \n{tabu_list}")
+        #print(f"iter: {i}: \n{tabu_list}")
         if cmax is not None:
             cmax_history.append(cmax)
 
-    plt.plot(np.arange(len(cmax_history)), cmax_history)
-    plt.show()
+    #plt.plot(np.arange(len(cmax_history)), cmax_history)
+    #plt.show()
     return data
+
+
+def test_different_parameters(data: str, start: int, stop: int, step: int, parameter_type: str):
+    "Test the algorithm with different parameters."
+    data = read_data("data/data.txt")
+    data = data["data.001"]
+    parameter_history = [i for i in range(start, stop, step)]
+    Cmax_history = []
+    for i in parameter_history:
+        if parameter_type == "tabu_ttl":
+            data = tabu_search(data, 500, tabu_ttl=i)
+        elif parameter_type == "n_iter":
+            data = tabu_search(data, n_iter=i)
+        Cmax_history.append(getTotalTime(data))
+
+    plt.plot(parameter_history, Cmax_history)
+    plt.show()
 
 
 def main():
@@ -196,4 +212,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    #main()
+    test_different_parameters("data.010", 1, 20, 1, "tabu_ttl")

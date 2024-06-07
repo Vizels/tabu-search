@@ -186,23 +186,25 @@ def tabu_search(data, n_iter=1000, tabu_ttl=7, use_best=False, show_plot=False):
 
     if show_plot:
         plt.plot(np.arange(len(cmax_history)), cmax_history)
+        plt.xlabel("Iteration")
+        plt.ylabel("Cmax")
         plt.show()
 
     return best_data if use_best else data
 
 
 def test_different_parameters(
-    data: str, start: int, stop: int, step: int, parameter_type: str, use_best=False
+    data_set: str, start: int, stop: int, step: int, parameter_type: str, use_best=False
 ):
     "Test the algorithm with different parameters."
     data = read_data("data/data.txt")
-    data = data["data.001"]
+    data = data[data_set]
     parameter_history = [i for i in range(start, stop, step)]
     Cmax_history = []
     for i in parameter_history:
         if parameter_type == "tabu_ttl":
             data = tabu_search(
-                data, 500, tabu_ttl=i, show_plot=False, use_best=use_best
+                data, 1000, tabu_ttl=i, show_plot=False, use_best=use_best
             )
             plt.xlabel("Tabu TTL")
             plt.ylabel("Cmax")
@@ -218,19 +220,20 @@ def test_different_parameters(
 
 def main():
     data = read_data("data/data.txt")
-    data = data["data.040"]
+    data = data["data.010"]
     # print(f"Data: {data}")
     print(f"Starting Total Time: {getTotalTime(data)}")
-    data = tabu_search(data, 10000, tabu_ttl=10, show_plot=True, use_best=True)
+    data = tabu_search(data, 1000, tabu_ttl=2, show_plot=True, use_best=True)
     print(f"Total_time: {getTotalTime(data)}")
 
 
 if __name__ == "__main__":
-    #main()
-    test_different_parameters(
-        data="data.010",
-        start=1,
-        stop=15,
-        step=1,
-        parameter_type="tabu_ttl",
-    )
+    main()
+    # test_different_parameters(
+    #     data_set="data.010",
+    #     start=100,
+    #     stop=2000,
+    #     step=400,
+    #     parameter_type="n_iter",
+    #     use_best=False
+    # )

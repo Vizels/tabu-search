@@ -204,8 +204,12 @@ def test_different_parameters(
             data = tabu_search(
                 data, 500, tabu_ttl=i, show_plot=False, use_best=use_best
             )
+            plt.xlabel("Tabu TTL")
+            plt.ylabel("Cmax")
         elif parameter_type == "n_iter":
             data = tabu_search(data, n_iter=i, show_plot=False, use_best=use_best)
+            plt.xlabel("Number of iterations")
+            plt.ylabel("Cmax")
         Cmax_history.append(getTotalTime(data))
 
     plt.plot(parameter_history, Cmax_history)
@@ -214,13 +218,19 @@ def test_different_parameters(
 
 def main():
     data = read_data("data/data.txt")
-    data = data["data.010"]
+    data = data["data.040"]
     # print(f"Data: {data}")
     print(f"Starting Total Time: {getTotalTime(data)}")
-    data = tabu_search(data, 2000, tabu_ttl=10, show_plot=True, use_best=True)
+    data = tabu_search(data, 10000, tabu_ttl=10, show_plot=True, use_best=True)
     print(f"Total_time: {getTotalTime(data)}")
 
 
 if __name__ == "__main__":
-    main()
-    # test_different_parameters("data.010", 1, 20, 1, "tabu_ttl")
+    #main()
+    test_different_parameters(
+        data="data.010",
+        start=1,
+        stop=15,
+        step=1,
+        parameter_type="tabu_ttl",
+    )
